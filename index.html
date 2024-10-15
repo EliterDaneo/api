@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>School Info</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.1.0/css/adminlte.min.css"
+    />
+
+    <style>
+      body {
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>School Information</h1>
+      <div id="running-text" class="alert alert-info"></div>
+      <form id="school-info-form">
+        <div class="form-group">
+          <label for="runningText">Running Text</label>
+          <input type="text" id="runningText" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label for="jumlahSiswa">Jumlah Siswa</label>
+          <input type="number" id="jumlahSiswa" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label for="jumlahGuru">Jumlah Guru</label>
+          <input type="number" id="jumlahGuru" class="form-control" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+
+      <h2>All School Info</h2>
+      <table id="school-info-table" class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Running Text</th>
+            <th>Jumlah Siswa</th>
+            <th>Jumlah Guru</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <script>
+      const apiUrl = "https://server-gamma-ebon-90.vercel.app/api/school-info";
+
+      function fetchData() {
+        fetch(apiUrl)
+          .then((response) => response.json())
+          .then((data) => {
+            const tableBody = document.querySelector(
+              "#school-info-table tbody"
+            );
+            tableBody.innerHTML = "";
+            data.forEach((info) => {
+              const row = `<tr>
+                              <td>${info.running_text}</td>
+                              <td>${info.jumlah_siswa}</td>
+                              <td>${info.jumlah_guru}</td>
+                              <td>
+                                  <button onclick="deleteInfo(${info.id})" class="btn btn-danger btn-sm">Delete</button>
+                              </td>
+                          </tr>`;
+              tableBody.insertAdjacentHTML("beforeend", row);
+            });
+
+            if (data.length > 0) {
+              document.getElementById("running-text").textContent =
+                data[0].running_text;
+            }
+          });
+      }
+
+      // Submit form data
+      document
+        .getElementById("school-info-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          const runningText = document.getElementById("runningText").value;
+          const jumlahSiswa = document.getElementById("jumlahSiswa").value;
+          const jumlahGuru = document.getElementById("jumlahGuru").value;
+
+          fetch(apiUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              running_text: runningText,
+              jumlah_siswa: jumlahSiswa,
+              jumlah_guru: jumlahGuru,
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              fetchData(); // Refresh data
+              document.getElementById("school-info-form").reset();
+            });
+        });
+
+      // Delete info
+      function deleteInfo(id) {
+        fetch(`${apiUrl}/${id}`, {
+          method: "DELETE",
+        }).then(() => {
+          fetchData();
+        });
+      }
+
+      // Fetch data on load
+      fetchData();
+    </script>
+  </body>
+</html>
