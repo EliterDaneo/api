@@ -3,12 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>School Info</title>
+    <title>Open API For Embeded SmartDashboard</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.1.0/css/adminlte.min.css"
     />
-
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css"
+    />
     <style>
       body {
         padding: 20px;
@@ -17,38 +20,73 @@
   </head>
   <body>
     <div class="container">
-      <h1>School Information</h1>
+      <h1>Sistem Informasi Api Sekolah</h1>
       <div id="running-text" class="alert alert-info"></div>
-      <form id="school-info-form">
-        <div class="form-group">
-          <label for="runningText">Running Text</label>
-          <input type="text" id="runningText" class="form-control" required />
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Data API</h3>
+            </div>
+            <div class="card-body">
+              <table id="school-info-table" class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Running Text</th>
+                    <th>Jumlah Siswa</th>
+                    <th>Jumlah Guru</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="jumlahSiswa">Jumlah Siswa</label>
-          <input type="number" id="jumlahSiswa" class="form-control" required />
-        </div>
-        <div class="form-group">
-          <label for="jumlahGuru">Jumlah Guru</label>
-          <input type="number" id="jumlahGuru" class="form-control" required />
-        </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-      </form>
 
-      <h2>All School Info</h2>
-      <table id="school-info-table" class="table table-bordered">
-        <thead>
-          <tr>
-            <th>Running Text</th>
-            <th>Jumlah Siswa</th>
-            <th>Jumlah Guru</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Tambah Data API</h3>
+            </div>
+            <div class="card-body">
+              <form id="school-info-form">
+                <div class="form-group">
+                  <label for="runningText">Teks Berjalan</label>
+                  <input
+                    type="text"
+                    id="runningText"
+                    class="form-control"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="jumlahSiswa">Jumlah Siswa</label>
+                  <input
+                    type="number"
+                    id="jumlahSiswa"
+                    class="form-control"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="jumlahGuru">Jumlah Guru</label>
+                  <input
+                    type="number"
+                    id="jumlahGuru"
+                    class="form-control"
+                    required
+                  />
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
     <script>
       const apiUrl = "https://server-gamma-ebon-90.vercel.app/api/school-info";
 
@@ -79,7 +117,7 @@
           });
       }
 
-      // Submit form data
+      // simpan data
       document
         .getElementById("school-info-form")
         .addEventListener("submit", function (e) {
@@ -101,21 +139,40 @@
           })
             .then((response) => response.json())
             .then((data) => {
-              fetchData(); // Refresh data
+              // Refresh data
+              fetchData();
               document.getElementById("school-info-form").reset();
+              swal("Success!", "Data has been added successfully!", "success");
+            })
+            .catch((error) => {
+              swal("Error!", "There was an error adding the data.", "error");
             });
         });
 
-      // Delete info
+      // Hapus data
       function deleteInfo(id) {
-        fetch(`${apiUrl}/${id}`, {
-          method: "DELETE",
-        }).then(() => {
-          fetchData();
-        });
+        swal(
+          {
+            title: "Are you sure?",
+            text: "Once deleted, you will not be able to recover this data!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            closeOnConfirm: false,
+          },
+          function () {
+            fetch(`${apiUrl}/${id}`, {
+              method: "DELETE",
+            }).then(() => {
+              fetchData();
+              swal("Deleted!", "Your data has been deleted.", "success");
+            });
+          }
+        );
       }
 
-      // Fetch data on load
+      // Fetch data dan load
       fetchData();
     </script>
   </body>
